@@ -177,26 +177,24 @@
 
     <div id="notification" class="notification"></div>
 
-    <div class="fixed bottom-6 right-6 z-40 font-sans text-left">
-        <button onclick="openAiScreen()" id="ai-fab" class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all group border border-blue-400/20">
+    <div class="fixed bottom-6 right-6 z-40 font-sans">
+        <button onclick="openAiScreen()" id="ai-fab" class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all group border border-blue-400/20">
             <i class="fa-solid fa-robot text-xl group-hover:rotate-12 transition-transform"></i>
             <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
         </button>
     </div>
 
-    <div id="ai-full-screen" class="hidden fixed inset-0 bg-slate-950 z-50 flex flex-col font-sans animate-fade-in text-left">
-        
+    <div id="ai-full-screen" class="hidden fixed inset-0 bg-slate-950 z-50 flex flex-col font-sans text-left">
         <header class="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/60 backdrop-blur-md shrink-0">
             <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
-                    <i class="fa-solid fa-brain text-white text-base"></i>
+                <div class="bg-blue-600 p-2 rounded-xl shadow-lg">
+                    <i class="fa-solid fa-brain text-white text-sm"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold tracking-wide text-slate-100">RouteLens Autonomous Intelligence</h2>
-                    <p class="text-[10px] text-indigo-400 font-mono tracking-wider">OMNI-MATRIX CONSOLE ACTIVE</p>
+                    <h2 class="text-sm font-bold tracking-wide text-slate-100">RouteLens Copilot Matrix</h2>
+                    <p class="text-[10px] text-indigo-400 font-mono tracking-wider uppercase">Onboard Intelligence Active</p>
                 </div>
             </div>
-            
             <button onclick="closeAiScreen()" class="w-10 h-10 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700 active:scale-95 transition-all shadow-md">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
@@ -204,10 +202,10 @@
 
         <div id="ai-chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl w-full mx-auto flex flex-col justify-start">
             <div class="flex gap-4 max-w-[85%] text-slate-300">
-                <div class="w-9 h-9 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold shrink-0 shadow-inner">
+                <div class="w-9 h-9 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold shrink-0">
                     <i class="fa-solid fa-robot"></i>
                 </div>
-                <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-lg">
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-lg">
                     Greetings, Operator. I am your integrated **RouteLens Intelligent Copilot**. I have parsed your structural codebase configurations. Ask me anything regarding **logistics management, advanced geospatial formulas, code layout structures**, or global metrics.
                 </div>
             </div>
@@ -223,7 +221,7 @@
 
                 <form id="ai-console-form" onsubmit="runAiEngine(event)" class="flex items-center gap-2 bg-slate-900 border border-slate-700 focus-within:border-indigo-500 rounded-2xl p-1.5 transition-all shadow-2xl">
                     <input type="text" id="ai-inp" autocomplete="off" placeholder="Ask RouteLens terminal any query..." class="flex-1 bg-transparent outline-none text-xs sm:text-sm text-slate-200 px-3 py-2">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 transition shadow-lg shadow-indigo-600/10">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 transition">
                         <span>Execute</span> <i class="fa-solid fa-paper-plane text-[10px]"></i>
                     </button>
                 </form>
@@ -284,7 +282,7 @@
 
             const activeLoader = document.createElement('div');
             activeLoader.className = "text-[11px] text-slate-500 font-mono flex items-center gap-1.5 pl-13 py-1";
-            activeLoader.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin text-indigo-500"></i> Parsing internal analytics matrix...';
+            activeLoader.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin text-indigo-500"></i> Scanning built-in knowledge repositories...';
             aiChatStream.appendChild(activeLoader);
             aiChatStream.scrollTop = aiChatStream.scrollHeight;
 
@@ -303,11 +301,11 @@
                 }
 
                 if (!matchedFlag) {
-                    outputResponse = `Inquiry **"${rawVal}"** processed through local engine pipelines. To hook up live third-party cloud data feeds directly into this view layer, connect your backend endpoint configuration inside this event controller module.`;
+                    outputResponse = `Inquiry **"${rawVal}"** evaluated against structural engine boundaries. To establish dynamic runtime lookups, extend this form submit callback to execute network queries against your server API endpoint layers.`;
                 }
 
                 appendAiBubble(outputResponse, 'ai');
-            }, 600);
+            }, 550);
         }
 
         function triggerQuickAi(promptString) {
