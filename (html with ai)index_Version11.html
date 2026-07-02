@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RouteLens - Smart Commute Optimizer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places,geometry"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>🗺️ RouteLens</h1>
+                <p class="tagline">Smart Commute Optimizer</p>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#routes">Routes</a></li>
+                <li><a href="#analytics">Analytics</a></li>
+                <li><a href="#profile">Profile</a></li>
+            </ul>
+        </nav>
+
+        <section id="home" class="hero">
+            <h2>Find Your Perfect Route</h2>
+            <p>Compare costs, time, and environmental impact all in one place</p>
+        </section>
+
+        <div class="main-content">
+            <section class="search-section">
+                <div class="search-card">
+                    <h3>Plan Your Journey</h3>
+                    <form id="routeForm">
+                        <div class="form-group">
+                            <label>From</label>
+                            <input type="text" id="fromLocation" placeholder="Enter starting point" class="location-input" required>
+                            <div id="fromSuggestions" class="suggestions"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>To</label>
+                            <input type="text" id="toLocation" placeholder="Enter destination" class="location-input" required>
+                            <div id="toSuggestions" class="suggestions"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="travelDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" id="travelTime" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Transport Modes</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox">
+                                    <input type="checkbox" value="driving" checked> 🚗 Driving
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" value="transit" checked> 🚌 Transit
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" value="walking" checked> 🚶 Walking
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" value="cycling" checked> 🚴 Cycling
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Find Routes</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="results" class="results-section hidden">
+                <h3>Available Routes</h3>
+                <div id="routesList" class="routes-list"></div>
+            </section>
+
+            <section class="map-section">
+                <div id="map" class="map-container"></div>
+            </section>
+
+            <section id="routeDetails" class="route-details hidden">
+                <h3>Route Details</h3>
+                <div id="detailsContainer" class="details-grid"></div>
+            </section>
+
+            <section id="analytics" class="analytics-section">
+                <h3>Your Commute Analytics</h3>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h4>Total Distance This Week</h4>
+                        <p id="totalDistance" class="stat">0 km</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Money Saved</h4>
+                        <p id="moneySaved" class="stat">$0</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>CO₂ Saved</h4>
+                        <p id="co2Saved" class="stat">0 kg</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Favorite Route</h4>
+                        <p id="favoriteRoute" class="stat">-</p>
+                    </div>
+                </div>
+                <canvas id="commutChart" class="chart"></canvas>
+            </section>
+
+            <section id="profile" class="profile-section">
+                <h3>My Profile</h3>
+                <div class="profile-card">
+                    <div class="form-group">
+                        <label>Work Address</label>
+                        <input type="text" id="workAddress" placeholder="Enter your work address">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Address</label>
+                        <input type="text" id="homeAddress" placeholder="Enter your home address">
+                    </div>
+                    <div class="form-group">
+                        <label>Car Type (for emissions calc)</label>
+                        <select id="carType">
+                            <option value="sedan">Sedan (25 km/L)</option>
+                            <option value="suv">SUV (18 km/L)</option>
+                            <option value="hybrid">Hybrid (40 km/L)</option>
+                            <option value="electric">Electric (0 emissions)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Budget Per Trip</label>
+                        <input type="number" id="budget" placeholder="Enter max budget" min="0" step="0.5">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+                </div>
+            </section>
+        </div>
+
+        <template id="routeCardTemplate">
+            <div class="route-card">
+                <div class="route-header">
+                    <span class="route-mode">🚗</span>
+                    <span class="route-title"></span>
+                </div>
+                <div class="route-info">
+                    <div class="info-item">
+                        <span class="label">Duration:</span>
+                        <span class="value duration"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Distance:</span>
+                        <span class="value distance"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Cost:</span>
+                        <span class="value cost"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">CO₂:</span>
+                        <span class="value emissions"></span>
+                    </div>
+                </div>
+                <button class="btn btn-secondary select-route">Select Route</button>
+            </div>
+        </template>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <div class="fixed bottom-6 right-6 z-40 font-sans text-left">
+        <button onclick="openAiScreen()" id="ai-fab" class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all group border border-blue-400/20">
+            <i class="fa-solid fa-robot text-xl group-hover:rotate-12 transition-transform"></i>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
+        </button>
+    </div>
+
+    <div id="ai-full-screen" class="hidden fixed inset-0 bg-slate-950 z-50 flex flex-col font-sans animate-fade-in text-left">
+        
+        <header class="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-slate-900/60 backdrop-blur-md shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-brain text-white text-base"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold tracking-wide text-slate-100">RouteLens Autonomous Intelligence</h2>
+                    <p class="text-[10px] text-indigo-400 font-mono tracking-wider">OMNI-MATRIX CONSOLE ACTIVE</p>
+                </div>
+            </div>
+            
+            <button onclick="closeAiScreen()" class="w-10 h-10 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700 active:scale-95 transition-all shadow-md">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </header>
+
+        <div id="ai-chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl w-full mx-auto flex flex-col justify-start">
+            <div class="flex gap-4 max-w-[85%] text-slate-300">
+                <div class="w-9 h-9 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold shrink-0 shadow-inner">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl rounded-tl-none text-xs sm:text-sm leading-relaxed shadow-lg">
+                    Greetings, Operator. I am your integrated **RouteLens Intelligent Copilot**. I have parsed your structural codebase configurations. Ask me anything regarding **logistics management, advanced geospatial formulas, code layout structures**, or global metrics.
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 bg-slate-900/40 backdrop-blur-md shrink-0">
+            <div class="max-w-4xl w-full mx-auto">
+                <div class="flex gap-2 overflow-x-auto pb-3 text-[11px] scrollbar-none">
+                    <button onclick="triggerQuickAi('Explain geospatial routing')" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3.5 py-2 rounded-xl shrink-0 text-slate-300 flex items-center gap-1.5 transition">🗺️ Routing Science</button>
+                    <button onclick="triggerQuickAi('Haversine formula in JS')" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3.5 py-2 rounded-xl shrink-0 text-slate-300 flex items-center gap-1.5 transition">💻 Haversine Formula</button>
+                    <button onclick="triggerQuickAi('What are greenhouse gas metrics?')" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3.5 py-2 rounded-xl shrink-0 text-slate-300 flex items-center gap-1.5 transition">🌱 Eco Parameters</button>
+                </div>
+
+                <form id="ai-console-form" onsubmit="runAiEngine(event)" class="flex items-center gap-2 bg-slate-900 border border-slate-700 focus-within:border-indigo-500 rounded-2xl p-1.5 transition-all shadow-2xl">
+                    <input type="text" id="ai-inp" autocomplete="off" placeholder="Ask RouteLens terminal any query..." class="flex-1 bg-transparent outline-none text-xs sm:text-sm text-slate-200 px-3 py-2">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shrink-0 transition shadow-lg shadow-indigo-600/10">
+                        <span>Execute</span> <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const aiFullScreen = document.getElementById('ai-full-screen');
+        const aiChatStream = document.getElementById('ai-chat-stream');
+        const aiInput = document.getElementById('ai-inp');
+
+        const KNOWLEDGE_LIBRARY = {
+            routing: "Geospatial layouts rely on **Dijkstra's variants** and **A* search algorithms** to construct navigation pathways. The backend dynamically weights coordinate segments based on live telemetry tracking variables.",
+            geospatial: "Geospatial layouts rely on **Dijkstra's variants** and **A* search algorithms** to construct navigation pathways. The backend dynamically weights coordinate segments based on live telemetry tracking variables.",
+            haversine: "To compute spatial distance over sphere surfaces without live maps, apply the **Haversine Formula**:<br><code class='bg-slate-950 px-2 py-1 rounded text-rose-400 block my-1 font-mono'>dLat = (lat2 - lat1) * Math.PI / 180;<br>a = Math.sin(dLat/2)**2 + Math.cos(lat1*rad) * Math.cos(lat2*rad);<br>c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));<br>dist = 6371 * c;</code>",
+            code: "When evaluating route arrays inside custom configurations, optimize your iterations by avoiding costly nested loop operations. Process multi-point nodes asynchronously to keep the primary map rendering sequence unblocked.",
+            greenhouse: "Vehicle fuel emissions are evaluated using fuel configuration benchmarks. Standard engines yield approximately **2.3 kg of CO₂ emissions per liter** of consumed fuel, whereas hybrid matrices compress this overhead by up to **40%**.",
+            eco: "Vehicle fuel emissions are evaluated using fuel configuration benchmarks. Standard engines yield approximately **2.3 kg of CO₂ emissions per liter** of consumed fuel, whereas hybrid matrices compress this overhead by up to **40%**.",
+            hello: "System configuration active. Provide an inquiry parameter regarding logistics, coordinate processing, or environmental metrics, and I will parse the request.",
+            hi: "System configuration active. Provide an inquiry parameter regarding logistics, coordinate processing, or environmental metrics, and I will parse the request."
+        };
+
+        function openAiScreen() {
+            aiFullScreen.classList.remove('hidden');
+        }
+
+        function closeAiScreen() {
+            aiFullScreen.classList.add('hidden');
+        }
+
+        function appendAiBubble(messageText, role) {
+            const isUser = role === 'user';
+            const node = document.createElement('div');
+            node.className = `flex gap-4 max-w-[85%] ${isUser ? 'ml-auto flex-row-reverse' : ''}`;
+            
+            let structuredOutput = messageText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+
+            node.innerHTML = `
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 shadow-md ${isUser ? 'bg-indigo-600 text-white' : 'bg-slate-800 border border-slate-700 text-blue-400'}">
+                    ${isUser ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>'}
+                </div>
+                <div class="p-4 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-lg ${isUser ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-slate-900 border border-slate-800 text-slate-300 rounded-tl-none'}">
+                    <p>${structuredOutput}</p>
+                </div>
+            `;
+            aiChatStream.appendChild(node);
+            aiChatStream.scrollTop = aiChatStream.scrollHeight;
+        }
+
+        function runAiEngine(event) {
+            event.preventDefault();
+            const rawVal = aiInput.value.trim();
+            if(!rawVal) return;
+            
+            appendAiBubble(rawVal, 'user');
+            aiInput.value = '';
+
+            const activeLoader = document.createElement('div');
+            activeLoader.className = "text-[11px] text-slate-500 font-mono flex items-center gap-1.5 pl-13 py-1";
+            activeLoader.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin text-indigo-500"></i> Parsing internal analytics matrix...';
+            aiChatStream.appendChild(activeLoader);
+            aiChatStream.scrollTop = aiChatStream.scrollHeight;
+
+            setTimeout(() => {
+                activeLoader.remove();
+                let outputResponse = "";
+                const cleanInput = rawVal.toLowerCase();
+                let matchedFlag = false;
+
+                for (const criteria in KNOWLEDGE_LIBRARY) {
+                    if (cleanInput.includes(criteria)) {
+                        outputResponse = KNOWLEDGE_LIBRARY[criteria];
+                        matchedFlag = true;
+                        break;
+                    }
+                }
+
+                if (!matchedFlag) {
+                    outputResponse = `Inquiry **"${rawVal}"** processed through local engine pipelines. To hook up live third-party cloud data feeds directly into this view layer, connect your backend endpoint configuration inside this event controller module.`;
+                }
+
+                appendAiBubble(outputResponse, 'ai');
+            }, 600);
+        }
+
+        function triggerQuickAi(promptString) {
+            aiInput.value = promptString;
+            document.getElementById('ai-console-form').requestSubmit();
+        }
+    </script>
+
+    <script src="js/api.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
